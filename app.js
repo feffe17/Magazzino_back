@@ -4,6 +4,9 @@ const host = process.env.HOST
 const port = process.env.PORT
 const cors = require('cors')
 
+app.use(cors())
+app.use(express.json())
+
 
 app.get('/', (req, res) => {
     res.send(`Server is up and running!`);
