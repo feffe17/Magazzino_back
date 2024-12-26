@@ -13,7 +13,10 @@ app.get('/', (req, res) => {
     res.send(`Server is up and running!`);
 })
 
-app.use('/tecnici', router)
+
+app.use('/', router)
+
+
 
 app.listen(port, () => {
     console.log(`Server in ascolto a http://${host}:${port}`);

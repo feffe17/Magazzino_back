@@ -1,17 +1,15 @@
 const connection = require("../db/db");
 
 function index(req, res) {
-    console.log("Eseguito tecController.index");
-    connection.query("SELECT * FROM tecnici", (err, results) => {
+    console.log("Eseguito matController.index");
+    connection.query("SELECT * FROM materiale", (err, results) => {
         if (err) return res.status(500).json({ err: err })
         res.json({
-            tecnici: results,
+            materiale: results,
             count: results.length
         })
     })
 }
-
-
 
 module.exports = {
     index
