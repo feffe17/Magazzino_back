@@ -5,6 +5,9 @@ const matController = require('../controllers/matController')
 
 
 router.get("/tecnici", tecController.index)
+router.post("/tecnici", tecController.store)
+router.delete("/tecnici/:Matricola", tecController.destroy)
+router.put("/tecnici/:Matricola", tecController.update)
 
 router.get("/materiale", matController.index)
 router.post("/materiale", matController.store)

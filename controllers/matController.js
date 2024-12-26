@@ -1,7 +1,7 @@
 const connection = require("../db/db");
 
 function index(req, res) {
-    console.log("Eseguito matController.index");
+    // console.log("Eseguito matController.index");
     connection.query("SELECT * FROM materiale", (err, results) => {
         if (err) return res.status(500).json({ err: err })
         res.json({
