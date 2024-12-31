@@ -1,10 +1,10 @@
 -- -- ctrl + alt + e to exec your query
 
 -- -- CREATE DATABASE
--- CREATE DATABASE "Your_DB_Name";
+-- CREATE DATABASE "magazzinoprova";
 
 -- -- CREATE TABLES
--- USE "Your_DB_Name";
+-- USE "magazzinoprova";
 
 -- CREATE TABLE tecnici (
 --     Matricola VARCHAR(20) NOT NULL,
@@ -36,6 +36,10 @@
 -- -- ADD NEW ITEM
 -- INSERT INTO materiale (Item, NomeOggetto) 
 -- VALUES ('F250', 'Shock Sensor')
+
+-- -- ADD NEW TECHNICIAN
+-- INSERT INTO tecnici (Matricola, Nome, Cognome)
+-- VALUES ('Q06604', 'Alessio', 'Monti');
 
 -- -- ASIGN ITEM TO TECHNICIAN
 -- INSERT INTO tecnici_materiali (MatricolaTecnico, Item, Utilizzabili, Guasti)

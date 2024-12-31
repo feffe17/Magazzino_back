@@ -1,108 +1,93 @@
 const connection = require("../db/db");
-const table2 = process.env.TABLE2;
-const table2Columns = process.env.TABLE2_COLUMNS.split(',');
 
 function index(req, res) {
-    connection.query("SELECT * FROM ??", [table2], (err, results) => {
-        if (err) return res.status(500).json({ err: err });
+    // console.log("Eseguito tecController.index");
+    connection.query("SELECT * FROM tecnici", (err, results) => {
+        if (err) return res.status(500).json({ err: err })
         res.json({
-            results,
+            tecnici: results,
             count: results.length
+        })
+    })
+}
+
+function store(req, res) {
+    const { Matricola, Nome, Cognome } = req.body;
+
+    // Verifica che i parametri siano forniti
+    if (!Matricola || !Nome || !Cognome) {
+        return res.status(400).json({ error: "I campi 'Matricola', 'Nome' e 'Cognome' sono obbligatori." });
+    }
+
+    connection.query("INSERT INTO tecnici (Matricola, Nome, Cognome) VALUES (?, ?, ?)", [Matricola, Nome, Cognome], (err, results) => {
+        if (err) {
+            // Gestione degli errori, ad esempio violazione di chiave primaria o altro
+            if (err.code === "ER_DUP_ENTRY") {
+                return res.status(409).json({ error: `La matricola  '${Matricola}' esiste già.` });
+            }
+            return res.status(500).json({ error: "Errore durante l'inserimento.", details: err });
+        }
+
+        // Risposta in caso di successo
+        res.status(201).json({
+            message: "Tecnico aggiunto con successo.",
+            data: { Matricola, Nome, Cognome }
         });
     });
 }
 
-function store(req, res) {
-    const columnValues = table2Columns.map(column => req.body[column]);
-
-    // Verifica che tutti i valori siano forniti
-    if (columnValues.includes(undefined)) {
-        return res.status(400).json({ error: `I campi ${table2Columns.join(', ')} sono obbligatori.` });
-    }
-
-    const placeholders = table2Columns.map(() => "?").join(", ");
-    connection.query(
-        `INSERT INTO ?? (${table2Columns.join(', ')}) VALUES (${placeholders})`,
-        [table2, ...columnValues],
-        (err, results) => {
-            if (err) {
-                if (err.code === "ER_DUP_ENTRY") {
-                    return res.status(409).json({ error: `Un record con questi dati esiste già.` });
-                }
-                return res.status(500).json({ error: "Errore durante l'inserimento.", details: err });
-            }
-
-            res.status(201).json({
-                message: "Record aggiunto con successo.",
-                data: Object.fromEntries(table2Columns.map((col, idx) => [col, columnValues[idx]]))
-            });
-        }
-    );
-}
-
 function destroy(req, res) {
-    const primaryKey = table2Columns[0]; // Supponiamo che la prima colonna sia la chiave primaria
-    const primaryKeyValue = req.params[primaryKey];
+    const { Matricola } = req.params;
 
-    if (!primaryKeyValue) {
-        return res.status(400).json({ error: `Il campo '${primaryKey}' è obbligatorio.` });
+    // Verifica che il parametro 'Item' sia fornito
+    if (!Matricola) {
+        return res.status(400).json({ error: "Il campo 'Matricola' è obbligatorio." });
     }
 
-    connection.query(
-        "DELETE FROM ?? WHERE ?? = ?",
-        [table2, primaryKey, primaryKeyValue],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ error: "Errore durante l'eliminazione.", details: err });
-            }
-
-            if (results.affectedRows === 0) {
-                return res.status(404).json({ error: `Nessun record trovato con '${primaryKey}' = '${primaryKeyValue}'` });
-            }
-
-            res.status(200).json({
-                message: `Il record con '${primaryKey}' = '${primaryKeyValue}' è stato eliminato con successo.`
-            });
+    connection.query("DELETE FROM tecnici WHERE Matricola = ?", [Matricola], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Errore durante l'eliminazione.", details: err });
         }
-    );
+
+        // Verifica se è stato effettivamente eliminato un record
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: `Nessuna 'Matricola' trovato con il valore '${Matricola}'` });
+        }
+
+        // Risposta in caso di successo
+        res.status(200).json({
+            message: `La Matricola '${Matricola}' è stato eliminato con successo.`
+        });
+    });
 }
 
 function update(req, res) {
-    const primaryKey = table2Columns[0]; // Supponiamo che la prima colonna sia la chiave primaria
-    const primaryKeyValue = req.params[primaryKey];
+    const { Matricola } = req.params; // Matricola da modificare
+    const { Nome, Cognome } = req.body; // Nuovo Nome e Cognome
 
-    if (!primaryKeyValue) {
-        return res.status(400).json({ error: `Il campo '${primaryKey}' è obbligatorio.` });
+    // Verifica che i parametri siano forniti
+    if (!Matricola || !Nome || !Cognome) {
+        return res.status(400).json({ error: "I campi 'Matricola', 'Nome' e 'Cognome' sono obbligatori." });
     }
 
-    const updateData = table2Columns.slice(1).reduce((acc, column) => {
-        if (req.body[column] !== undefined) {
-            acc.columns.push(column);
-            acc.values.push(req.body[column]);
-        }
-        return acc;
-    }, { columns: [], values: [] });
-
-    if (updateData.columns.length === 0) {
-        return res.status(400).json({ error: "Almeno un campo deve essere fornito per l'aggiornamento." });
-    }
-
-    const updatePlaceholders = updateData.columns.map(column => `${column} = ?`).join(", ");
+    // Query per aggiornare il Nome e/o il Cognome della Matricola specificata
     connection.query(
-        `UPDATE ?? SET ${updatePlaceholders} WHERE ?? = ?`,
-        [table2, ...updateData.values, primaryKey, primaryKeyValue],
+        "UPDATE tecnici SET Nome = ?, Cognome = ? WHERE Matricola = ?",
+        [Nome, Cognome, Matricola],
         (err, results) => {
             if (err) {
                 return res.status(500).json({ error: "Errore durante l'aggiornamento.", details: err });
             }
 
+            // Verifica se è stato effettivamente aggiornato un record
             if (results.affectedRows === 0) {
-                return res.status(404).json({ error: `Nessun record trovato con '${primaryKey}' = '${primaryKeyValue}'` });
+                return res.status(404).json({ error: `Nessuna 'Matricola' trovata con il valore '${Matricola}'` });
             }
 
+            // Risposta in caso di successo
             res.status(200).json({
-                message: `Il record con '${primaryKey}' = '${primaryKeyValue}' è stato aggiornato con successo.`,
-                data: Object.fromEntries(updateData.columns.map((col, idx) => [col, updateData.values[idx]]))
+                message: `Il Nome e Cognome della Matricola '${Matricola}' sono stati aggiornati con successo.`,
+                data: { Matricola, Nome, Cognome }
             });
         }
     );
@@ -113,4 +98,4 @@ module.exports = {
     store,
     destroy,
     update
-};
+}
