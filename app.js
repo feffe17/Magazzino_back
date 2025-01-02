@@ -1,19 +1,26 @@
 const express = require('express');
-require('dotenv').config();
 const app = express();
-const host = process.env.HOST
-const port = process.env.PORT
+
+require('dotenv').config();
 const cors = require('cors')
 const router = require("./routes/routes")
+const loginRouter = require("./routes/authRoute")
+
+const host = process.env.HOST
+const port = process.env.PORT
+
+
+
+
 
 app.use(cors())
 app.use(express.json())
 
+app.use('/login', loginRouter)
 
 app.get('/', (req, res) => {
     res.send(`Server is up and running!`);
 })
-
 
 app.use('/', router)
 
