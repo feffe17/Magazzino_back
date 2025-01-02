@@ -5,6 +5,7 @@ require('dotenv').config();
 const cors = require('cors')
 const router = require("./routes/routes")
 const loginRouter = require("./routes/authRoute")
+const mid = require("./middleware/mid")
 
 const host = process.env.HOST
 const port = process.env.PORT
@@ -18,11 +19,11 @@ app.use(express.json())
 
 app.use('/login', loginRouter)
 
-app.get('/', (req, res) => {
+app.get('/', [mid.checkAuth], (req, res) => {
     res.send(`Server is up and running!`);
 })
 
-app.use('/', router)
+app.use('/', [mid.checkAuth], router)
 
 
 

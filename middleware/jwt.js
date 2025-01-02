@@ -1,7 +1,10 @@
 var jwt = require('jsonwebtoken');
+let fs = require('fs');
+const path = require('path');
+
 
 let options = {
-    algorithm: 'HS256',
+    algorithm: 'RS256',
     expiresIn: 86400 // expires in 24 hours
 }
 
@@ -11,16 +14,15 @@ let getPayload = (token) => {
 }
 
 let setToken = (id, username) => {
-    let payload = {
-        id: id,
-        username: username
-    };
-    var token = jwt.sign(payload, 'secret', options);
+    let payload = { id: id, username: username };
+    let privateKey = fs.readFileSync(__dirname + "/rsa.key")
+    var token = jwt.sign(payload, privateKey, options);
     return token;
 };
 
 let checkToken = (token) => {
-    jwt.verify(token, 'secret', options)
+    let publicKey = fs.readFileSync(__dirname + '/rsa.pem')
+    jwt.verify(token, publicKey, options)
 }
 
 module.exports = {
