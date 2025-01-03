@@ -19,11 +19,12 @@ app.use(express.json())
 
 app.use('/login', loginRouter)
 
-app.get('/', [mid.checkAuth], (req, res) => {
+app.get('/', (req, res) => {
     res.send(`Server is up and running!`);
 })
 
-app.use('/', [mid.checkAuth], router)
+// app.use('/', [mid.checkAuth], router)
+app.use('/', router)
 
 
 

@@ -1,51 +1,57 @@
+-- -- ctrl + a to select all
+-- -- ctrl + ù to uncomment all
 -- -- ctrl + alt + e to exec your query
 
--- -- CREATE DATABASE
--- CREATE DATABASE "magazzinoprova";
+-- -- NUOVA STRUTTURA DB
+-- DROP DATABASE IF EXISTS magazzino;
+-- CREATE DATABASE magazzino;
+--  USE magazzino;
 
--- -- CREATE TABLES
--- USE "magazzinoprova";
-
--- CREATE TABLE tecnici (
---     Matricola VARCHAR(20) NOT NULL,
---     Nome VARCHAR(50),
---     Cognome VARCHAR(50),
---     PRIMARY KEY (Matricola)
+-- -- TABELLA UTENTI
+-- CREATE TABLE Users (
+--     ID INT AUTO_INCREMENT,
+--     Username VARCHAR(20) NOT NULL UNIQUE,
+--     Nome VARCHAR(50) NOT NULL,
+--     Cognome VARCHAR(50) NOT NULL,
+--     Email VARCHAR(100) NOT NULL UNIQUE,
+--     Password VARCHAR(255) NOT NULL,
+--     PRIMARY KEY (ID)
 -- );
 
--- CREATE TABLE materiale (
---     Item VARCHAR(50) NOT NULL,
---     NomeOggetto VARCHAR(100),
---     PRIMARY KEY (Item)
+-- -- TABELLA MAGAZZINI
+-- CREATE TABLE Magazzini (
+--     ID INT AUTO_INCREMENT,
+--     NomeMagazzino VARCHAR(50) NOT NULL,
+--     UserID INT NOT NULL, -- Riferimento all'utente che possiede il magazzino
+--     PRIMARY KEY (ID),
+--     FOREIGN KEY (UserID) REFERENCES Users(ID)
+--     ON DELETE CASCADE ON UPDATE CASCADE
 -- );
 
--- -- CREATE RELATIONSHIP TABLE
--- CREATE TABLE tecnici_materiali (
---     MatricolaTecnico VARCHAR(20) NOT NULL,
+-- -- TABELLA MATERIALE
+-- CREATE TABLE Materiale (
+--     ID INT AUTO_INCREMENT,
 --     Item VARCHAR(50) NOT NULL,
+--     Descrizione VARCHAR(255),
 --     Utilizzabili INT DEFAULT 0,
 --     Guasti INT DEFAULT 0,
---     PRIMARY KEY (MatricolaTecnico, Item),
---     FOREIGN KEY (MatricolaTecnico) REFERENCES tecnici(Matricola)
---         ON DELETE CASCADE ON UPDATE CASCADE,
---     FOREIGN KEY (Item) REFERENCES materiale(Item)
---         ON DELETE CASCADE ON UPDATE CASCADE
+--     MagazzinoID INT NOT NULL, -- Riferimento al magazzino
+--     PRIMARY KEY (ID),
+--     FOREIGN KEY (MagazzinoID) REFERENCES Magazzini(ID)
+--     ON DELETE CASCADE ON UPDATE CASCADE,
+--     UNIQUE (MagazzinoID, Item) -- Garantisce l'unicità dell'item all'interno di un magazzino
 -- );
 
-
--- -- ADD NEW ITEM
--- INSERT INTO materiale (Item, NomeOggetto) 
--- VALUES ('F250', 'Shock Sensor')
-
--- -- ADD NEW TECHNICIAN
--- INSERT INTO tecnici (Matricola, Nome, Cognome)
--- VALUES ('Q06604', 'Alessio', 'Monti');
-
--- -- ASIGN ITEM TO TECHNICIAN
--- INSERT INTO tecnici_materiali (MatricolaTecnico, Item, Utilizzabili, Guasti)
--- VALUES ('Q06604', 'F250', 40, 0);
-
--- -- UPDATE ITEM QUANTITY
--- UPDATE tecnici_materiali
--- SET Guasti = +8
--- WHERE MatricolaTecnico = 'Q06604' AND Item = 'F250';
+-- -- TABELLA PERMESSI
+-- CREATE TABLE Permessi (
+--     ID INT AUTO_INCREMENT,
+--     UserID INT NOT NULL, -- Utente a cui sono assegnati i permessi
+--     MagazzinoID INT NOT NULL, -- Magazzino su cui si applicano i permessi
+--     Ruolo ENUM('Admin', 'Mod', 'User') NOT NULL, -- Ruolo specifico per il magazzino
+--     PRIMARY KEY (ID),
+--     FOREIGN KEY (UserID) REFERENCES Users(ID)
+--     ON DELETE CASCADE ON UPDATE CASCADE,
+--     FOREIGN KEY (MagazzinoID) REFERENCES Magazzini(ID)
+--     ON DELETE CASCADE ON UPDATE CASCADE,
+--     UNIQUE (UserID, MagazzinoID) -- Un utente può avere un solo ruolo per ogni magazzino
+-- );
